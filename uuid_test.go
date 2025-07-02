@@ -33,6 +33,10 @@ func TestVersion(t *testing.T) {
 	if uuid.Version() != 5 {
 		t.Errorf("invalid version %d - expected 5", uuid.Version())
 	}
+	uuid[6] = 0x70
+	if uuid.Version() != 7 {
+		t.Errorf("invalid version %d - expected 7", uuid.Version())
+	}
 }
 
 func ExampleUUID_String() {
