@@ -14,7 +14,9 @@ Supports UUID versions 1, 3, 4, 5, and 7 according to RFC 4122 and RFC 9562.
   package main
 
   import (
+      "encoding/json"
       "fmt"
+      "log"
       "github.com/thomastthai/fgrid-uuid"
   )
 
@@ -38,6 +40,41 @@ Supports UUID versions 1, 3, 4, 5, and 7 according to RFC 4122 and RFC 9562.
       // UUID v7 - timestamp with random data (RFC 9562)
       v7 := uuid.NewV7()
       fmt.Printf("UUID v7: %s\n", v7.String())
+
+      // Parsing UUIDs from strings
+      uuidString := "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+      parsed, err := uuid.ParseUUID(uuidString)
+      if err != nil {
+          log.Fatalf("Error parsing UUID: %v", err)
+      }
+      fmt.Printf("Parsed UUID: %s\n", parsed.String())
+      fmt.Printf("UUID version: %d\n", parsed.Version())
+
+      // Using UUIDs with JSON
+      type User struct {
+          ID   *uuid.UUID `json:"id"`
+          Name string     `json:"name"`
+      }
+
+      user := User{
+          ID:   uuid.NewV4(),
+          Name: "John Doe",
+      }
+
+      // Marshal to JSON
+      jsonData, err := json.Marshal(user)
+      if err != nil {
+          log.Fatalf("Error marshaling JSON: %v", err)
+      }
+      fmt.Printf("JSON: %s\n", jsonData)
+
+      // Unmarshal from JSON
+      var parsedUser User
+      err = json.Unmarshal(jsonData, &parsedUser)
+      if err != nil {
+          log.Fatalf("Error unmarshaling JSON: %v", err)
+      }
+      fmt.Printf("Parsed user ID: %s\n", parsedUser.ID.String())
   }
   ```
 
