@@ -33,9 +33,13 @@ func TestVersion(t *testing.T) {
 	if uuid.Version() != 5 {
 		t.Errorf("invalid version %d - expected 5", uuid.Version())
 	}
+	uuid[6] = 0x70
+	if uuid.Version() != 7 {
+		t.Errorf("invalid version %d - expected 7", uuid.Version())
+	}
 }
 
-func ExampleString_NIL() {
+func ExampleUUID_String() {
 	fmt.Printf("NIL-UUID: %s", NIL.String())
 	// Output:
 	// NIL-UUID: 00000000-0000-0000-0000-000000000000
