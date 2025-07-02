@@ -3,6 +3,8 @@ package uuid
 import (
 	"encoding/binary"
 	"fmt"
+	"regexp"
+	"strings"
 )
 
 // The UUID represents Universally Unique IDentifier (which is 128 bit long).
@@ -49,6 +51,55 @@ func (u *UUID) Version() int {
 // String returns the human readable form of the UUID.
 func (u *UUID) String() string {
 	return fmt.Sprintf("%x-%x-%x-%x-%x", u[0:4], u[4:6], u[6:8], u[8:10], u[10:])
+}
+
+// MarshalText implements encoding.TextMarshaler interface.
+// Returns the string representation of the UUID.
+func (u *UUID) MarshalText() ([]byte, error) {
+	return []byte(u.String()), nil
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler interface.
+// Parses a UUID from its string representation.
+func (u *UUID) UnmarshalText(text []byte) error {
+	parsed, err := ParseUUID(string(text))
+	if err != nil {
+		return err
+	}
+	*u = *parsed
+	return nil
+}
+
+// ParseUUID parses a UUID from its string representation.
+// Accepts both hyphenated (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx) and 
+// non-hyphenated (xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx) formats.
+// Returns an error if the input is not a valid UUID string.
+func ParseUUID(s string) (*UUID, error) {
+	// Remove hyphens and convert to lowercase
+	s = strings.ReplaceAll(strings.ToLower(s), "-", "")
+	
+	// Validate length
+	if len(s) != 32 {
+		return nil, fmt.Errorf("invalid UUID length: expected 32 hex characters, got %d", len(s))
+	}
+	
+	// Validate hex characters
+	hexPattern := regexp.MustCompile("^[0-9a-f]{32}$")
+	if !hexPattern.MatchString(s) {
+		return nil, fmt.Errorf("invalid UUID format: contains non-hex characters")
+	}
+	
+	var uuid UUID
+	for i := 0; i < 16; i++ {
+		// Parse two hex characters at a time
+		var b byte
+		if _, err := fmt.Sscanf(s[i*2:i*2+2], "%02x", &b); err != nil {
+			return nil, fmt.Errorf("invalid UUID format: %v", err)
+		}
+		uuid[i] = b
+	}
+	
+	return &uuid, nil
 }
 
 func (u *UUID) variantRFC4122() {
